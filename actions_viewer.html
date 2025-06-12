@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azioni di Sviluppo Urbano</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React Development CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX transformation in browser (for development only) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d3748;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6a768f;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div id="root" class="flex-grow"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Definizione delle 20 azioni con i percorsi ai tuoi simboli JPG locali (stessa cartella)
+        const all_actions = [
+            {
+                id: 1,
+                title: "Restauro Centro Storico",
+                symbol: "01.jpg", // Ora puntiamo al file 01.jpg nella stessa cartella
+                description: "Riqualificazione e conservazione dei monumenti e delle aree storiche della città.",
+                cost: 500000,
+                base_benefit: 50,
+                variations: {"Storica": 20, "Citta' d'arte": 30, "Moderna": -10}
+            },
+            {
+                id: 2,
+                title: "Polo Tecnologico Innovativo",
+                symbol: "02.jpg", // Ora puntiamo al file 02.jpg nella stessa cartella
+                description: "Investimento in infrastrutture e supporto per start-up tecnologiche.",
+                cost: 800000,
+                base_benefit: 80,
+                variations: {"Tecnologica": 40, "Universitaria": 20, "Multiculturale": 10}
+            },
+            {
+                id: 3,
+                title: "Parco Urbano Eco-sostenibile",
+                symbol: "03.jpg", // Ora puntiamo al file 03.jpg nella stessa cartella
+                description: "Creazione di un ampio parco pubblico con infrastrutture verdi e piste ciclabili.",
+                cost: 600000,
+                base_benefit: 60,
+                variations: {"Moderna": 20, "Multietnica": 10}
+            },
+            {
+                id: 4,
+                title: "Campagna di Promozione Turistica",
+                symbol: "04.jpg", // Ora puntiamo al file 04.jpg nella stessa cartella
+                description: "Lancio di una campagna globale per attrarre visitatori e investitori nel settore turistico.",
+                cost: 400000,
+                base_benefit: 40,
+                variations: {"Turismo": 30, "Citta' d'arte": 15, "Capoluogo": 10}
+            },
+            {
+                id: 5,
+                title: "Potenziamento Trasporto Pubblico",
+                symbol: "05.jpg", // Ora puntiamo al file 05.jpg nella stessa cartella
+                description: "Espansione della rete di trasporti pubblici e adozione di mezzi ecologici.",
+                cost: 700000,
+                base_benefit: 70,
+                variations: {"Capoluogo": 20, "Multietnica": 15}
+            },
+            {
+                id: 6,
+                title: "Festival Culturale Internazionale",
+                symbol: "06.jpg", // Ora puntiamo al file 06.jpg nella stessa cartella
+                description: "Organizzazione di un grande festival artistico e culturale con artisti da tutto il mondo.",
+                cost: 450000,
+                base_benefit: 55,
+                variations: {"Multiculturale": 30, "Storica": 10}
+            },
+            {
+                id: 7,
+                title: "Riqualificazione Aree Industriali",
+                symbol: "07.jpg", // Ora puntiamo al file 07.jpg nella stessa cartella
+                description: "Conversione di vecchie fabbriche in spazi commerciali, residenziali o ricreativi.",
+                cost: 750000,
+                base_benefit: 65,
+                variations: {"Industria": 25, "Tecnologica": 15}
+            },
+            {
+                id: 8,
+                title: "Programma di Borse di Studio",
+                symbol: "08.jpg", // Ora puntiamo al file 08.jpg nella stessa cartella
+                description: "Finanziamento di borse di studio per studenti meritevoli e incentivi alla ricerca universitaria.",
+                cost: 300000,
+                base_benefit: 35,
+                variations: {"Universitaria": 30, "Capoluogo": 10}
+            },
+            {
+                id: 9,
+                title: "Centro di Accoglienza Immigrati",
+                symbol: "09.jpg", // Ora puntiamo al file 09.jpg nella stessa cartella
+                description: "Apertura di un centro per l'integrazione e il supporto dei nuovi residenti stranieri.",
+                cost: 200000,
+                base_benefit: 25,
+                variations: {"Multietnica": 20}
+            },
+            {
+                id: 10,
+                title: "Potenziamento Agricoltura Biologica",
+                symbol: "10.jpg", // Ora puntiamo al file 10.jpg nella stessa cartella
+                description: "Incentivi e supporto agli agricoltori per la transizione verso pratiche biologiche sostenibili.",
+                cost: 350000,
+                base_benefit: 40,
+                variations: {"Agricoltura": 25, "Moderna": 5}
+            },
+            {
+                id: 11,
+                title: "Centro Benessere Termale",
+                symbol: "11.jpg", // Ora puntiamo al file 11.jpg nella stessa cartella
+                description: "Sviluppo di un complesso termale e SPA per attrarre turismo di nicchia.",
+                cost: 650000,
+                base_benefit: 60,
+                variations: {"Turismo": 25, "Citta' d'arte": 10}
+            },
+            {
+                id: 12,
+                title: "Rete Fibra Ottica Ultraveloce",
+                symbol: "12.jpg", // Ora puntiamo al file 12.jpg nella stessa cartella
+                description: "Estensione della copertura in fibra ottica in tutta la città, anche nelle aree periferiche.",
+                cost: 900000,
+                base_benefit: 90,
+                variations: {"Tecnologica": 40, "Universitaria": 15}
+            },
+            {
+                id: 13,
+                title: "Programma di Rimboschimento Urbano",
+                symbol: "13.jpg", // Ora puntiamo al file 13.jpg nella stessa cartella
+                description: "Piantumazione intensiva di alberi e creazione di nuovi spazi verdi nel tessuto urbano.",
+                cost: 300000,
+                base_benefit: 30,
+                variations: {"Moderna": 10, "Multietnica": 5}
+            },
+            {
+                id: 14,
+                title: "Sviluppo Industria Manifatturiera",
+                symbol: "14.jpg", // Ora puntiamo al file 14.jpg nella stessa cartella
+                description: "Incentivi fiscali e supporto per l'espansione e la modernizzazione delle industrie locali.",
+                cost: 700000,
+                base_benefit: 75,
+                variations: {"Industria": 35, "Capoluogo": 10}
+            },
+            {
+                id: 15,
+                title: "Museo di Arte Contemporanea",
+                symbol: "15.jpg", // Ora puntiamo al file 15.jpg nella stessa cartella
+                description: "Costruzione di un nuovo museo dedicato all'arte moderna e contemporanea.",
+                cost: 550000,
+                base_benefit: 60,
+                variations: {"Citta' d'arte": 25, "Multiculturale": 10}
+            },
+            {
+                id: 16,
+                title: "Centro di Ricerca Biomedica",
+                symbol: "16.jpg", // Ora puntiamo al file 16.jpg nella stessa cartella
+                description: "Fondazione di un polo di eccellenza per la ricerca medica e biotecnologica.",
+                cost: 950000,
+                base_benefit: 100,
+                variations: {"Tecnologica": 50, "Universitaria": 30}
+            },
+            {
+                id: 17,
+                title: "Corso di Formazione Professionale",
+                symbol: "17.jpg", // Ora puntiamo al file 17.jpg nella stessa cartella
+                description: "Corsi intensivi per riqualificare la forza lavoro e soddisfare le nuove esigenze del mercato.",
+                cost: 250000,
+                base_benefit: 30,
+                variations: {"Industria": 10, "Agricoltura": 10, "Terziario": 10}
+            },
+            {
+                id: 18,
+                title: "Promozione Commercio Equo e Solidale",
+                symbol: "18.jpg", // Ora puntiamo al file 18.jpg nella stessa cartella
+                description: "Incentivi per l'apertura di negozi e attività basate sui principi del commercio etico.",
+                cost: 150000,
+                base_benefit: 20,
+                variations: {"Multietnica": 15, "Moderna": 5}
+            },
+            {
+                id: 19,
+                title: "Riqualificazione Waterfront Portuale",
+                symbol: "19.jpg", // Ora puntiamo al file 19.jpg nella stessa cartella
+                description: "Trasformazione delle aree portuali dismesse in un polo turistico e ricreativo.",
+                cost: 850000,
+                base_benefit: 70,
+                variations: {"Capoluogo": 25, "Turismo": 15}
+            },
+            {
+                id: 20,
+                title: "Potenziamento Servizi Sociali",
+                symbol: "20.jpg", // Ora puntiamo al file 20.jpg nella stessa cartella
+                description: "Incremento dei fondi per asili nido, centri anziani e assistenza alle famiglie in difficoltà.",
+                cost: 400000,
+                base_benefit: 45,
+                variations: {"Multietnica": 10, "Universitaria": 5}
+            }
+        ];
+
+        // Funzione helper per formattare i numeri con separatore migliaia
+        const formatNumberWithThousandsSeparator = (value) => {
+            return new Intl.NumberFormat('it-IT').format(value);
+        };
+
+        // Componente per il Pop-up dei Dettagli dell'Azione
+        const ActionDetailModal = ({ action, onClose }) => {
+            if (!action) return null;
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full p-8 relative overflow-y-auto max-h-[90vh]">
+                        <button
+                            onClick={onClose}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl font-bold"
+                        >
+                            &times;
+                        </button>
+                        <h2 className="text-4xl font-extrabold text-yellow-400 text-center mb-6">
+                            {action.title}
+                        </h2>
+                        <div className="flex justify-center mb-6">
+                            <img
+                                src={action.symbol} // Userà "01.jpg", "02.jpg" ecc.
+                                alt={action.title}
+                                className="w-24 h-24 rounded-full border-4 border-purple-600 shadow-lg object-cover"
+                                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/800080/ffffff?text=ERR'; }}
+                            />
+                        </div>
+                        <p className="text-lg text-gray-300 text-center mb-6 leading-relaxed">
+                            {action.description}
+                        </p>
+                        <div className="flex justify-center items-center space-x-12 mb-6">
+                            <span className="text-2xl font-semibold text-red-500">
+                                Costo: €{formatNumberWithThousandsSeparator(action.cost)}
+                            </span>
+                            <span className="text-2xl font-semibold text-cyan-400">
+                                Beneficio Base: {action.base_benefit} Punti
+                            </span>
+                        </div>
+
+                        {Object.keys(action.variations).length > 0 && (
+                            <div className="bg-gray-700 p-6 rounded-md mb-6 border border-orange-500">
+                                <h3 className="text-2xl font-bold text-orange-400 text-center mb-4">
+                                    Variazioni per Caratteristica:
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4 text-xl">
+                                    {Object.entries(action.variations).map(([char, value]) => (
+                                        <React.Fragment key={char}>
+                                            <span className="text-right text-gray-200 font-medium">
+                                                {char}:
+                                            </span>
+                                            <span className={`text-left font-bold ${value > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                {value > 0 ? '+' : ''}{value} Punti
+                                            </span>
+                                        </React.Fragment>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {Object.keys(action.variations).length === 0 && (
+                            <p className="text-md text-gray-500 text-center mt-4">
+                                Nessuna variazione specifica per questa azione.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // Componente principale della lista delle azioni
+        const App = () => {
+            const [selectedAction, setSelectedAction] = useState(null);
+
+            const handleShowDetails = (actionId) => {
+                const action = all_actions.find(a => a.id === actionId);
+                setSelectedAction(action);
+            };
+
+            const handleCloseDetails = () => {
+                setSelectedAction(null);
+            };
+
+            return (
+                <div className="container mx-auto p-4 md:p-8 flex flex-col flex-grow">
+                    <h1 className="text-5xl md:text-6xl font-extrabold text-white text-center mb-8 md:mb-12 drop-shadow-lg">
+                        Azioni di Sviluppo Urbano
+                    </h1>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-grow overflow-y-auto pb-4">
+                        {all_actions.map(action => (
+                            <div
+                                key={action.id}
+                                className="bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex flex-col p-6 border-b-4 border-indigo-600"
+                            >
+                                <div className="flex items-center mb-4">
+                                    <img
+                                    src={action.symbol} // Userà "01.jpg", "02.jpg" ecc.
+                                        alt={action.title}
+                                        className="w-16 h-16 md:w-20 md:h-20 rounded-full mr-4 border-2 border-indigo-400 object-cover"
+                                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/800080/ffffff?text=ERR'; }}
+                                    />
+                                    <h2 className="text-3xl font-bold text-lime-400 leading-tight">
+                                        {action.title}
+                                    </h2>
+                                </div>
+                                <p className="text-md text-gray-400 mb-4 flex-grow leading-relaxed">
+                                    {action.description.substring(0, 120)}...
+                                </p>
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className="text-xl font-semibold text-red-400">
+                                        €{formatNumberWithThousandsSeparator(action.cost)}
+                                    </span>
+                                    <span className="text-xl font-semibold text-cyan-300">
+                                        {action.base_benefit} Punti
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={() => handleShowDetails(action.id)}
+                                    className="bg-indigo-700 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 self-center w-full md:w-auto"
+                                >
+                                    Vedi Dettagli
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {selectedAction && (
+                        <ActionDetailModal action={selectedAction} onClose={handleCloseDetails} />
+                    )}
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
